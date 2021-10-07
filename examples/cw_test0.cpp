@@ -7,7 +7,7 @@ using namespace BIORBD_NAMESPACE;
 int main()
 
 {
-    Model model;
+    Model model("sagar_ior.bioMod");
     cout << "Hello World!" << endl;
     return 0;
 }
