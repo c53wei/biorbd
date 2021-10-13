@@ -10,6 +10,7 @@
 
 #include "Utils/all.h"
 #include "RigidBody/all.h"
+#include "LuaTest/all.h"
 #ifdef MODULE_MUSCLES
     #include "Muscles/all.h"
 #endif

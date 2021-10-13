@@ -5,6 +5,7 @@ set(EXAMPLE_FILES
     "forwardDynamicsExample.cpp"
     "inverseDynamicsExample.cpp"
     "cw_test0.cpp"
+    "cw_test1.cpp"
 )
 if (MODULE_MUSCLES)
     list(APPEND EXAMPLE_FILES "forwardDynamicsFromMusclesExample.cpp")
