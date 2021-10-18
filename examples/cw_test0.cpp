@@ -16,11 +16,11 @@ int main()
     BiorbdEigen3::Model biorbd_model("sagar_ior.bioMod");
     BiorbdEigen3::Model arm_model("arm26.bioMod");
     
-//    RigidBodyDynamics::Model rbdl_model;
-//    bool modelLoaded = LuaModelReadFromFile("sagar_ior.lua", &rbdl_model, false);
+    RigidBodyDynamics::Model rbdl_model;
+    bool modelLoaded = LuaModelReadFromFile("sagar_ior.lua", &rbdl_model, false);
     
     BiorbdEigen3::Model biorbd_from_lua;
-    bool modelLoaded = LuaModelReadFromFile("sagar_ior.lua", &biorbd_from_lua, false);
+    modelLoaded = LuaModelReadFromFile("sagar_ior.lua", &biorbd_from_lua, false);
 
     cout << "Hello World!" << endl;
     return 0;

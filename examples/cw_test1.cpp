@@ -49,6 +49,32 @@ int main()
     bool verbose = true;
     
     int frame_count = model_table["frames"].length();
+    // Define parent to child segment mapping dictionary
+    typedef map<string, unsigned int> StringIntMap;
+    StringIntMap body_table_id_map;
+    
+    body_table_id_map["ROOT"] = 0;
+    
+    for(int i=1; i<frame_count; ++i)
+    {
+        if (!model_table["frames"][i]["parent"].exists()) {
+          throw Errors::RBDLError("Parent not defined for frame ");
+        }
+
+        utils::String body_name( model_table["frames"][i]["name"].getDefault<string>(""));
+        cout << body_name << endl;
+        
+        utils::String parent_name( model_table["frames"][i]["parent"].get<string>());
+        cout << parent_name << endl;
+        
+        unsigned int parent_id = body_table_id_map[parent_name];
+        
+        // TODO: Make joint map into rotation and translation sequence
+        Joint joint
+          = model_table["frames"][i]["joint"].getDefault(Joint(JointTypeFixed));
+        
+    }
+    
     
     if (model_table["gravity"].exists()) {
         Vector3d gravity(model_table["gravity"].get<Vector3d>());
