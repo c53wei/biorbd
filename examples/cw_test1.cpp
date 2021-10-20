@@ -64,10 +64,10 @@ int main()
         }
 
         utils::String body_name(model_table["frames"][i]["name"].getDefault<string>(""));
-        cout << body_name << endl;
+        cout << "Segement: "<< body_name << endl;
         
         utils::String parent_name( model_table["frames"][i]["parent"].get<string>());
-        cout << parent_name << endl;
+        cout << "Parent: " << parent_name << endl;
         
         unsigned int parent_id = body_table_id_map[parent_name];
         
@@ -76,23 +76,35 @@ int main()
         RigidBodyDynamics::Math::MatrixNd joint_matrix (model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder)
                                                                                                             );
         cout << "Initial Matrix:\n" << joint_matrix << "\n\n";
-
+        
+        char xyz[4] = "xyz";
+        string trans, rot;
+        
         if(joint_matrix.size())
         {
             // Rotation
             RigidBodyDynamics::Math::MatrixNd rot_mat = joint_matrix(Eigen::all, Eigen::seq(0, Eigen::last/2));
-            cout << "Rotation Matrix:\n" << rot_mat << "\n\n";
+            cout << "Rotation Matrix:\n" << rot_mat << "\n";
+            Eigen::Matrix<ptrdiff_t, 3, 1> res = (rot_mat.array() == 1).colwise().count();
+            for(int j = 0; j < 3; ++j)
+            {
+                if(res[j]) {
+                    rot.append(1, xyz[j]);
+                }
+            }
+            cout << rot << "\n\n";
             // Translation matrix
-            RigidBodyDynamics::Math::MatrixNd trans_mat = joint_matrix(Eigen::all, Eigen::seq(Eigen::last/2, Eigen::last));
-            cout << "Translation Matrix:\n" << trans_mat << "\n\n";
+            RigidBodyDynamics::Math::MatrixNd trans_mat = joint_matrix(Eigen::all, Eigen::seq(Eigen::last/2 + 1, Eigen::last));
+            cout << "Translation Matrix:\n" << trans_mat << "\n";
+            res = (trans_mat.array() == 1).colwise().count();
+            for(int j = 0; j < 3; ++j)
+            {
+                if(res[j]) {
+                    trans.append(1, xyz[j]);
+                }
+            }
+            cout << trans << "\n\n";
         }
-        
-
-        
-        
- 
-      
- 
     }
     
     
