@@ -55,13 +55,15 @@ int main()
     
     body_table_id_map["ROOT"] = 0;
     
+    
+    
     for(int i=1; i<frame_count; ++i)
     {
         if (!model_table["frames"][i]["parent"].exists()) {
           throw Errors::RBDLError("Parent not defined for frame ");
         }
 
-        utils::String body_name( model_table["frames"][i]["name"].getDefault<string>(""));
+        utils::String body_name(model_table["frames"][i]["name"].getDefault<string>(""));
         cout << body_name << endl;
         
         utils::String parent_name( model_table["frames"][i]["parent"].get<string>());
@@ -70,9 +72,27 @@ int main()
         unsigned int parent_id = body_table_id_map[parent_name];
         
         // TODO: Make joint map into rotation and translation sequence
-        Joint joint
-          = model_table["frames"][i]["joint"].getDefault(Joint(JointTypeFixed));
+        RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
+        RigidBodyDynamics::Math::MatrixNd joint_matrix (model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder)
+                                                                                                            );
+        cout << "Initial Matrix:\n" << joint_matrix << "\n\n";
+
+        if(joint_matrix.size())
+        {
+            // Rotation
+            RigidBodyDynamics::Math::MatrixNd rot_mat = joint_matrix(Eigen::all, Eigen::seq(0, Eigen::last/2));
+            cout << "Rotation Matrix:\n" << rot_mat << "\n\n";
+            // Translation matrix
+            RigidBodyDynamics::Math::MatrixNd trans_mat = joint_matrix(Eigen::all, Eigen::seq(Eigen::last/2, Eigen::last));
+            cout << "Translation Matrix:\n" << trans_mat << "\n\n";
+        }
         
+
+        
+        
+ 
+      
+ 
     }
     
     
@@ -89,3 +109,4 @@ int main()
 //    cout << "Current path is " << fs::current_path() << '\n';
     return 0;
 }
+
