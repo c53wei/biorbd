@@ -49,15 +49,10 @@ int main()
     bool verbose = true;
     
     int frame_count = model_table["frames"].length();
-    // Define parent to child segment mapping dictionary
-    typedef map<string, unsigned int> StringIntMap;
-    StringIntMap body_table_id_map;
+    // No force plates
+    int force_plates = -1;
     
-    body_table_id_map["ROOT"] = 0;
-    
-    
-    
-    for(int i=1; i<frame_count; ++i)
+    for(int i=1; i <= frame_count; ++i)
     {
         if (!model_table["frames"][i]["parent"].exists()) {
           throw Errors::RBDLError("Parent not defined for frame ");
@@ -69,7 +64,6 @@ int main()
         utils::String parent_name( model_table["frames"][i]["parent"].get<string>());
         cout << "Parent: " << parent_name << endl;
         
-        unsigned int parent_id = body_table_id_map[parent_name];
         
         // Make joint map into rotation and translation sequence
         RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
@@ -141,25 +135,35 @@ int main()
         }
         // TODO: mass, com, inertia, mesh
         double mass = model_table["frames"][i]["body"]["mass"];
-        cout << mass << endl;
+        cout << "Mass: "<< mass << endl;
         
         utils::Vector3d com(0,0,0);
         com = model_table["frames"][i]["body"]["com"].getDefault<RigidBodyDynamics::Math::Vector3d>(com);
-        cout << com << endl;
+        cout << "Centre of Mass: "<< com << endl;
         
         utils::Matrix3d inertia(utils::Matrix3d::Zero());
         inertia = model_table["frames"][i]["body"]["inertia"].getDefault<RigidBodyDynamics::Math::Matrix3d>(inertia);
-        cout << inertia << endl;
+        cout << "Inertia: " << inertia << endl;
         
         rigidbody::Mesh mesh;
         
         // TODO: Rototrans matrix
-        utils::RotoTrans RT(RigidBodyDynamics::Math::Matrix4d::Identity());
         RigidBodyDynamics::Math::Vector3d r (model_table["frames"][i]["joint_frame"]["r"].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero()));
+        
+        RigidBodyDynamics::Math::Matrix3d E (model_table["frames"][i]["joint_frame"]["E"].getDefault<RigidBodyDynamics::Math::Matrix3d>(
+                                                                                                                                        RigidBodyDynamics::Math::Matrix3d::Identity()));
+        utils::RotoTrans RT(E, r);
+        cout << "RotoTrans: " << endl;
+        cout << RT << "\n\n";
         
         // Define segmeent attributes
         rigidbody::SegmentCharacteristics characteristics(mass, com, inertia, mesh);
+        // Add the segment
+        model.AddSegment(body_name, parent_name, trans, rot, QRanges, QDotRanges,
+                          QDDotRanges, characteristics, RT, force_plates);
+
     }
+    
     
     if (model_table["gravity"].exists()) {
         Vector3d gravity(model_table["gravity"].get<Vector3d>());
@@ -169,6 +173,8 @@ int main()
         cout << "gravity = " << model.gravity.transpose() << endl;
       }
     }
+    
+    
     return 0;
 }
 
