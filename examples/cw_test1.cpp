@@ -71,7 +71,7 @@ int main()
         
         unsigned int parent_id = body_table_id_map[parent_name];
         
-        // TODO: Make joint map into rotation and translation sequence
+        // Make joint map into rotation and translation sequence
         RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
         RigidBodyDynamics::Math::MatrixNd joint_matrix (model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder)
                                                                                                             );
@@ -83,30 +83,76 @@ int main()
         if(joint_matrix.size())
         {
             // Rotation
-            RigidBodyDynamics::Math::MatrixNd rot_mat = joint_matrix(Eigen::all, Eigen::seq(0, Eigen::last/2));
-            cout << "Rotation Matrix:\n" << rot_mat << "\n";
-            Eigen::Matrix<ptrdiff_t, 3, 1> res = (rot_mat.array() == 1).colwise().count();
-            for(int j = 0; j < 3; ++j)
-            {
-                if(res[j]) {
-                    rot.append(1, xyz[j]);
-                }
-            }
-            cout << rot << "\n\n";
+            RigidBodyDynamics::Math::MatrixNd rot_mat =
+                joint_matrix(Eigen::all, Eigen::seq(0, Eigen::last/2));
+            
+            Eigen::Matrix<ptrdiff_t, 3, 1> rot_count = (rot_mat.array() == 1).colwise().count();
             // Translation matrix
             RigidBodyDynamics::Math::MatrixNd trans_mat = joint_matrix(Eigen::all, Eigen::seq(Eigen::last/2 + 1, Eigen::last));
-            cout << "Translation Matrix:\n" << trans_mat << "\n";
-            res = (trans_mat.array() == 1).colwise().count();
+            Eigen::Matrix<ptrdiff_t, 3, 1> trans_count = (trans_mat.array() == 1).colwise().count();
             for(int j = 0; j < 3; ++j)
             {
-                if(res[j]) {
+                if(rot_count[j]) {
+                    rot.append(1, xyz[j]);
+                }
+                if(trans_count[j])
+                {
                     trans.append(1, xyz[j]);
                 }
             }
+            cout << "Rotation Matrix:\n" << rot_mat << "\n";
+            cout << rot << "\n\n";
+            cout << "Translation Matrix:\n" << trans_mat << "\n";
             cout << trans << "\n\n";
         }
+        // QRanges
+        vector<utils::Range> QRanges;
+        size_t rot_length(0);
+        if (rot.compare("q")) {
+            // If not a quaternion
+            rot_length = rot.length();
+        } else {
+            rot_length = 4;
+        }
+        for (size_t j=0; j<trans.length() + rot_length; ++j) {
+            if (!rot.compare("q") && j>=trans.length()) {
+                QRanges.push_back(
+                    utils::Range (-1, 1));
+            } else {
+                QRanges.push_back(
+                    utils::Range ());
+            }
+        }
+        // QDotRanges & QDDotRanges
+        vector<utils::Range> QDotRanges;
+        vector<utils::Range> QDDotRanges;
+        rot_length = 0;
+        if (rot.compare("q")) {
+            // If not a quaternion
+            rot_length = rot.length();
+        } else {
+            rot_length = 3;
+        }
+        for (size_t j=0; j<trans.length() + rot_length; ++j) {
+            QDotRanges.push_back(
+                utils::Range (-M_PI*10, M_PI*10));
+            QDDotRanges.push_back(
+                utils::Range (-M_PI*100, M_PI*100));
+        }
+        // TODO: mass, com, inertia, mesh
+        double mass = model_table["frames"][i]["body"]["mass"];
+        cout << mass << endl;
+        
+        utils::Vector3d com(0,0,0);
+        com = model_table["frames"][i]["body"]["com"].getDefault<RigidBodyDynamics::Math::Vector3d>(com);
+        cout << com << endl;
+        
+        utils::Matrix3d inertia(utils::Matrix3d::Zero());
+        inertia = model_table["frames"][i]["body"]["inertia"].getDefault<RigidBodyDynamics::Math::Matrix3d>(inertia);
+        cout << inertia << endl;
+        
+        rigidbody::Mesh mesh;
     }
-    
     
     if (model_table["gravity"].exists()) {
         Vector3d gravity(model_table["gravity"].get<Vector3d>());
