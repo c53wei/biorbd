@@ -152,6 +152,13 @@ int main()
         cout << inertia << endl;
         
         rigidbody::Mesh mesh;
+        
+        // TODO: Rototrans matrix
+        utils::RotoTrans RT(RigidBodyDynamics::Math::Matrix4d::Identity());
+        RigidBodyDynamics::Math::Vector3d r (model_table["frames"][i]["joint_frame"]["r"].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero()));
+        
+        // Define segmeent attributes
+        rigidbody::SegmentCharacteristics characteristics(mass, com, inertia, mesh);
     }
     
     if (model_table["gravity"].exists()) {
@@ -162,9 +169,6 @@ int main()
         cout << "gravity = " << model.gravity.transpose() << endl;
       }
     }
-//    cout << "Current path is " << fs::current_path() << '\n'; // (1)
-//    fs::current_path(fs::temp_directory_path()); // (3)
-//    cout << "Current path is " << fs::current_path() << '\n';
     return 0;
 }
 
