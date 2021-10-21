@@ -1,0 +1,565 @@
+version    4
+
+    segment    Pelvis
+        parent ROOT
+        translations xyz
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 0
+            0 0 0 1
+        mass    2
+        inertia
+          0.020411477089657 0, 0
+          0 0.016384281461821 0
+          0 0 0.018595180776803
+        com     0 0 0.039812086109075
+    endsegment
+    
+    // Markers
+        marker  LV5
+            parent  Pelvis
+            position   -0.096348828216895 0.0019952033814929 0.10247641212117
+        endmarker
+
+        marker  L_IAS
+            parent  Pelvis
+            position   0.072736622308149 0.12762879689268, 0.075215765589612
+        endmarker
+
+        marker  L_IPS
+            parent  Pelvis
+            position   -0.078798719280574 0.065444129551159 0.11640641941462
+        endmarker
+
+        marker  R_IAS
+            parent  Pelvis
+            position   0.085521868817947 -0.1226341241548 0.075215765589612
+        endmarker
+
+        marker  R_IPS
+            parent  Pelvis
+            position   -0.079459771845521 -0.070438802289027 0.12240165345794
+        endmarker
+
+
+
+    segment    Thigh_R
+        parent Pelvis
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 -0.090258918707532
+            0 0 1 0
+            0 0 0 1
+        mass    8.9942783026299
+        inertia
+            0.16363756906027 0 0
+            0 0.16363756906027 0
+            0 0 0.033563230852514
+        com     0 0 -0.16788672487296
+    endsegment
+    
+    // Markers
+        marker  R_FLE
+            parent  Thigh_R
+            position   0 -0.055310296201105 -0.41476110625348
+        endmarker
+
+        marker  R_FME
+            parent  Thigh_R
+            position   0 0.055310296201105 -0.42996711713073
+        endmarker
+
+        marker  R_FTC
+            parent  Thigh_R
+            position   0 -0.11062059240221 -0.040962439927216
+        endmarker
+
+
+
+    segment    Thigh_L
+        parent Pelvis
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0.090258918707532
+            0 0 1 0
+            0 0 0 1
+        mass    8.9942783026299
+        inertia
+            0.16363756906027 0 0
+            0 0.16363756906027 0
+            0 0 0.033563230852514
+        com     0 0 -0.16788672487296
+    endsegment
+    
+    // Markers
+        marker  L_FLE
+            parent  Thigh_L
+            position   0 0.058086365644267 -0.41323725458635
+        endmarker
+
+        marker  L_FME
+            parent  Thigh_L
+            position   0 -0.058086365644267 -0.4342938105614
+        endmarker
+
+        marker  L_FTC
+            parent  Thigh_L
+            position   0 0.11617273128853 -0.046753686314687
+        endmarker
+
+
+    
+    segment    Shank_R
+        parent Thigh_R
+        rotations    y
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.40997979211956
+            0 0 0 1
+        mass    2.6057677640314
+        inertia
+            0.026937572115476 0 0
+            0 0.025875051414107 0
+            0 0 0.0044484770128953
+        com     0 0 -0.17803136819067
+    endsegment
+    
+    // Markers
+        marker  R_FAL
+            parent  Shank_R
+            position    0 -0.044615957632821 -0.40360131217251
+        endmarker
+
+        marker  R_FAX
+            parent  Shank_R
+            position    0 -0.055310296201105 -0.039931533419203
+        endmarker
+
+        marker  R_TAM
+            parent  Shank_R
+            position   0 0.044615957632821 -0.39790389044946
+        endmarker
+
+        marker  R_TTC
+            parent  Shank_R
+            position   0.051418729268576 0 -0.066923448621392
+        endmarker
+
+
+    segment    Shank_L
+        parent Thigh_L
+        rotations    y
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.40507706072962
+            0 0 0 1
+        mass    2.6057677640314
+        inertia
+            0.026937572115476 0 0
+            0 0.025875051414107 0
+            0 0 0.0044484770128953
+        com     0 0 -0.17803136819067
+    endsegment
+    
+    // Markers
+        marker  L_FAL
+            parent  Shank_L
+            position    0 0.042551664802427 -0.4045274274436
+        endmarker
+
+        marker  L_FAX
+            parent  Shank_L
+            position    0 0.058086365644267 -0.048258217262721
+        endmarker
+
+        marker  L_TAM
+            parent  Shank_L
+            position   0 -0.042551664802427 -0.39848892429897
+        endmarker
+
+        marker  L_TTC
+            parent  Shank_L
+            position   0.057973267945151 0 -0.074685381742419
+        endmarker
+
+
+    segment    Foot_R
+        parent Shank_R
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.40507706072962
+            0 0 0 1
+        mass    0.97107905614421
+        inertia
+            0.0050170357033386 0 0
+            0 0.0045594568894745 0
+            0 0 0.0011679501729706
+        com     0.12347922261688 0 0
+    endsegment
+    
+    // Markers
+        marker  R_FCC
+            parent  Foot_R
+            position    -0.073514279998653 0 -0.028949470640231
+        endmarker
+
+        marker  R_FM1
+            parent  Foot_R
+            position    0.13907432562828 0.048090424008652 -0.03217495091489
+        endmarker
+
+        marker  R_FM5
+            parent  Foot_R
+            position   0.12956169620037 -0.048090424008652 -0.043389207896064
+        endmarker
+
+
+    segment    Foot_L
+        parent Shank_L
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.40507706072962
+            0 0 0 1
+        mass    0.97107905614421
+        inertia
+            0.0050170357033386 0 0
+            0 0.0045594568894745 0
+            0 0 0.0011679501729706
+        com     0.12347922261688 0 0
+    endsegment
+    
+    // Markers
+        marker  L_FCC
+            parent  Foot_L
+            position    -0.08050155029296877 0.0 -0.042802178955078124
+        endmarker
+
+        marker  L_FM1
+            parent  Foot_L
+            position    0.15008272309897475 -0.04038546217448228 -0.04736812133789063
+        endmarker
+
+        marker  L_FM5
+            parent  Foot_L
+            position   0.16205297003969388 0.04038546217448228 -0.03990776977539063
+        endmarker
+
+/*
+        marker  L_FCC
+            parent  Foot_L
+            position    -0.080393456568573 0 -0.041189581403545
+        endmarker
+
+        marker  L_FM1
+            parent  Foot_L
+            position    0.13002839664623+0.009 -0.041100325621135-0.007 -0.038654873230878
+        endmarker
+
+        marker  L_FM5
+            parent  Foot_L
+            position   0.12970472635272 0.041100325621135 -0.048292887703711
+        endmarker
+*/
+
+    segment    MiddleTrunk
+        parent Pelvis
+        rotations    yz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 0.10247641212117
+            0 0 0 1
+        mass    10.74395906882
+        inertia
+            0.11727126206997 0 0
+            0 0.074044886287178 0
+            0 0 0.11055775943774
+        com     0 0 0.1191712032122
+    endsegment
+    
+    // Markers
+        marker  LV1
+            parent  MiddleTrunk
+            position   -0.06153907086936 -0.0049042620805798 0.074018365897384
+        endmarker
+
+        marker  LV3
+            parent  MiddleTrunk
+            position   -0.076824521315866 -0.0021423504052043 0.040139764737682
+        endmarker
+
+        marker  MAI
+            parent  MiddleTrunk
+            position   -0.07312549777258 -0.0015505956548269 0.21675373447108
+        endmarker
+
+        marker  SXS
+            parent  MiddleTrunk
+            position   0.13604944320219 0.0008371105007097 0.21414235770602
+        endmarker
+
+    segment    UpperTrunk
+        parent MiddleTrunk
+        rotations    xy
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 0.21680000424385
+            0 0 0 1
+        mass    9.4689593413396
+        inertia
+            0.11643823775843 0 0
+            0 0.046753359656754 0
+            0 0 0.098723097575992
+        com     0 0  0.10834389713964
+    endsegment
+    
+    // Markers
+        marker  CV7
+            parent  UpperTrunk
+            position   -0.013978635729194 0.0018231495421807 0.21958633388658
+        endmarker
+
+        marker  L_SAE
+            parent  UpperTrunk
+            position   0 0.11857917489135 0.21617645075608
+        endmarker
+
+        marker  R_SAE
+            parent  UpperTrunk
+            position   0 -0.11857917489135 0.21059094879407
+        endmarker
+
+        marker  SJN
+            parent  UpperTrunk
+            position   0.11287044408141 0.00034798125526149 0.15610641607717
+        endmarker
+
+        marker  TV2
+            parent  UpperTrunk
+            position   -0.034053806620152 0.0011196634896329 0.18422443319369
+        endmarker
+
+
+    segment    UpperArm_R
+        parent UpperTrunk
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 -0.19859999418259
+            0 0 1 0.17306677997112
+            0 0 0 1
+        mass    1.711522087775
+        inertia
+            0.010283824690366 0 0
+            0 0.0091615615687235 0
+            0 0 0.0031606697392465
+        com     0 0 -0.1569883918147
+    endsegment
+    
+    // Markers
+        marker  R_HLE
+            parent  UpperArm_R
+            position   0 -0.032889621110519 -0.27193765791193
+        endmarker
+
+        marker  R_HME
+            parent  UpperArm_R
+            position    0 0.032889621110519 -0.2808997313006
+        endmarker
+
+        marker  R_HUM
+            parent  UpperArm_R
+            position    0 -0.043852828147361 -0.1300836344497
+        endmarker
+
+
+    segment    UpperArm_L
+        parent UpperTrunk
+        rotations    xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0.19859999418259
+            0 0 1 0.17309999465942
+            0 0 0 1
+        mass    1.711522087775
+        inertia
+            0.010283824690366 0 0
+            0 0.0091615615687235 0
+            0 0 0.0031606697392465
+        com     0 0 -0.1569883918147
+    endsegment
+    
+    // Markers
+        marker  L_HLE
+            parent  UpperArm_L
+            position    0 0.028836225449238 -0.27202766369131
+        endmarker
+
+        marker  L_HME
+            parent  UpperArm_L
+            position     0 -0.028836225449238 -0.28140568054211
+        endmarker
+
+        marker  L_HUM
+            parent  UpperArm_L
+            position    0 0.038448300598983 -0.15069114407622
+        endmarker
+
+
+    segment    LowerArm_R
+        parent UpperArm_R
+        rotations    yz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.27198266080162
+            0 0 0 1
+        mass    1.0069938933548
+        inertia
+            0.0050087869334809 0 0
+            0 0.0046174918925081 0
+            0 0, 0.00096268706013828
+        com     0 0 -0.11687992888153
+    endsegment
+    
+    // Markers
+        marker  R_RSP
+            parent  LowerArm_R
+            position    0.032889621110519 0 -0.2496921610483
+        endmarker
+
+        marker  R_USP
+            parent  LowerArm_R
+            position     -0.032889621110519 0 -0.25206030112939
+        endmarker
+
+
+    segment    LowerArm_L
+        parent UpperArm_L
+        rotations    yz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.27198266080162
+            0 0 0 1
+        mass    1.0069938933548
+        inertia
+            0.0050087869334809 0 0
+            0 0.0046174918925081 0
+            0 0, 0.00096268706013828
+        com     0 0 -0.11687992888153
+    endsegment
+    
+    // Markers
+        marker  L_RSP
+            parent  LowerArm_L
+            position    0.028836225449238 0 -0.24684999415804
+        endmarker
+
+        marker  L_USP
+            parent  LowerArm_L
+            position     -0.028836225449238 0 -0.25900191523062
+        endmarker
+
+
+
+    segment    Hand_R
+        parent LowerArm_R
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.2855187677157638
+            0 0 0 1
+        mass    0.40887875314401423
+        inertia
+            0.0007982062065274877 0.0 0.0
+            0.0 0.0005314542071214375 0.0
+            0.0 0.0, 0.000325811021028581
+        com     0.0 0.0 -0.05559759167590957
+    endsegment
+    
+    // Markers
+        marker  R_HM2
+            parent  Hand_R
+            position    0.032889621110519 -0.025 -0.14615655300902
+        endmarker
+
+    segment    Hand_L
+        parent LowerArm_L
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 -0.2855187677157638
+            0 0 0 1
+        mass    0.40887875314401423
+        inertia
+            0.0007982062065274877 0.0 0.0
+            0.0 0.0005314542071214375 0.0
+            0.0 0.0, 0.000325811021028581
+        com     0.0 0.0 -0.05559759167590957
+    endsegment
+    
+    // Markers
+        marker  L_HM2
+            parent  Hand_L
+            position    0.028836225449238 0.025 -0.1411233857135
+        endmarker
+
+    segment    Head
+        parent UpperTrunk
+        rotations xyz
+        rtinmatrix 1
+        rt
+            1 0 0 0
+            0 1 0 0
+            0 0 1 0.24959999322891
+            0 0 0 1
+        mass    4.8487209007008
+        inertia
+            0.029962994324311 0 0
+            0 0.032383296973388 0
+            0 0 0.022232124697648
+        com     0.0 0.0 0.12966794740601
+    endsegment
+    
+    // Markers
+        marker  L_HEAD
+            parent  Head
+            position    0.1528189387228 0.061339660358028 0.1781924585508
+        endmarker
+
+        marker  R_HEAD
+            parent  Head
+            position    0.16136580252448 -0.066867091822691 0.17097919607296
+        endmarker
+
+        marker  SGL
+            parent  Head
+            position    0.193483261071 -0.00080599057173523 0.17494818679425
+        endmarker

@@ -1,15 +1,11 @@
-project(${BIORBD_NAME}_actuators)
-set(ACTUATOR_MODULE_NAME ${BIORBD_NAME}_actuators PARENT_SCOPE)
+project(${BIORBD_NAME}_luatest)
+set(LUATEST_MODULE_NAME ${BIORBD_NAME}_luatest PARENT_SCOPE)
 
 # Add the relevant files
 set(SRC_LIST_MODULE
-    "${CMAKE_CURRENT_SOURCE_DIR}/Actuator.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ActuatorConstant.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ActuatorGauss3p.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ActuatorGauss6p.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ActuatorLinear.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ActuatorSigmoidGauss3p.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Actuators.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/luamodel.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/luatables.cc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/rbdl_luamodel_util.cc"
 )
 
 # Create the library
@@ -27,6 +23,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "_debug")
 # Add the include
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${RBDL_INCLUDE_DIR}"
+    "${RBDL_INCLUDE_DIR}/.."
     "${MATH_BACKEND_INCLUDE_DIR}"
     "${CMAKE_SOURCE_DIR}/include"
     "${BIORBD_BINARY_DIR}/include"

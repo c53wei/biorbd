@@ -3,7 +3,7 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.0")
     cmake_policy(SET CMP0042 NEW)
 endif()
 
-project(biorbd VERSION 1.7.4)
+project(biorbd VERSION 1.8.1)
 set(BIORBD_ROOT_FOLDER ${PROJECT_SOURCE_DIR})
 set (BIORBD_NAME_NO_SUFFIX ${PROJECT_NAME})
 set (CMAKE_CXX_STANDARD 11)
@@ -59,7 +59,7 @@ elseif(${MATH_LIBRARY_BACKEND} STREQUAL "Casadi")
     )
     set(MATH_BACKEND_LIBRARIES "${Casadi_LIBRARY}")
     find_package(RBDLCasadi REQUIRED)
-    set(RBDL_INCLUDE_DIR ${RBDLCasadi_INCLUDE_DIR})
+    set(RBDL_INCLUDE_DIR ${RBDLCasadi_INCLUDE_DIR} ${RBDLCasadi_INCLUDE_DIR}/rbdl-casadi)
     set(RBDL_LIBRARY ${RBDLCasadi_LIBRARY})
 endif()
 find_package(IPOPT)
@@ -139,7 +139,6 @@ target_include_directories(${BIORBD_NAME} PRIVATE
     "${CMAKE_SOURCE_DIR}/include"
     "${BIORBD_BINARY_DIR}/include"
     "${RBDL_INCLUDE_DIR}"
-    "${RBDL_INCLUDE_DIR}/.."
     "${MATH_BACKEND_INCLUDE_DIR}"
     "${TinyXML_INCLUDE_DIR}"
 )
@@ -154,7 +153,7 @@ if(WIN32)
     set(${BIORBD_NAME}_LIB_FOLDER "Lib")
     set(${BIORBD_NAME}_BIN_FOLDER "bin")
     set(${BIORBD_NAME}_INCLUDE_FOLDER "include/${BIORBD_NAME}")
-        set(${BIORBD_NAME}_CMAKECONFIG_DIR "Lib/cmake/${BIORBD_NAME}")
+    set(${BIORBD_NAME}_CMAKECONFIG_DIR "Lib/cmake/${BIORBD_NAME}")
 else()
     set(${BIORBD_NAME}_LIB_FOLDER "lib/${BIORBD_NAME}")
     set(${BIORBD_NAME}_BIN_FOLDER "${CMAKE_INSTALL_PREFIX}/lib/${BIORBD_NAME}")
@@ -176,6 +175,10 @@ list(APPEND BIORBD_MODULE_NAMES "${UTILS_MODULE_NAME}")
 # Utils
 add_subdirectory("src/RigidBody")
 list(APPEND BIORBD_MODULE_NAMES "${RIGIDBODY_MODULE_NAME}")
+
+# Lua Test
+add_subdirectory("src/LuaTest")
+list(APPEND BIORBD_MODULE_NAMES "${LUATEST_MODULE_NAME}")
 
 # Actuators
 option(MODULE_ACTUATORS
@@ -234,7 +237,7 @@ configure_package_config_file(
     "${BIORBD_BINARY_DIR}/${BIORBD_NAME}Config.cmake"
     INSTALL_DESTINATION "${CMAKE_SHARE_DIR}"
 )
-install(FILES 
+install(FILES
     "${BIORBD_BINARY_DIR}/${BIORBD_NAME}Config.cmake"
     DESTINATION "${CMAKE_SHARE_DIR}"
 )
@@ -253,7 +256,7 @@ if(NOT TARGET uninstall)
     )
 endif()
 
-        
+
 # Add binding subdirectory
 add_subdirectory("binding")
 

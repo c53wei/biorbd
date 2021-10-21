@@ -4,6 +4,8 @@ set(EXAMPLE_FILES
     "forwardKinematicsExample.cpp"
     "forwardDynamicsExample.cpp"
     "inverseDynamicsExample.cpp"
+    "cw_test0.cpp"
+    "cw_test1.cpp"
 )
 if (MODULE_MUSCLES)
     list(APPEND EXAMPLE_FILES "forwardDynamicsFromMusclesExample.cpp")
@@ -31,7 +33,6 @@ foreach(FILE ${EXAMPLE_FILES})
         "${CMAKE_SOURCE_DIR}/include"
         "${BIORBD_BINARY_DIR}/include"
         "${RBDL_INCLUDE_DIR}"
-        "${RBDL_INCLUDE_DIR}/.."
         "${IPOPT_INCLUDE_DIR}"
         "${MATH_BACKEND_INCLUDE_DIR}"
     )
