@@ -50,8 +50,23 @@ public:
     static void readModelFile(
         const utils::Path &path,
         Model *model);
-
     ///
+    /// \brief Create a biorbd model from a bioMod file
+    /// \param path The path of the file
+    ///
+    static Model readLuaFile(
+        const utils::Path &path);
+    
+    ///
+    /// \brief Load Model  from LUA file
+    /// \param path The path of the file
+    /// \param model The model to fill
+    /// \return Returns the model to fill
+    /// 
+    static void readLuaFile(
+        const utils::Path &path, Model *model);
+
+    
     /// \brief Read a bioMark file, containing markers data
     /// \param path The path of the file
     /// \return Returns the markers

@@ -28,7 +28,11 @@ Model::Model(const utils::Path &path) :
     {
         Reader::readModelFile(*m_path, this);
     }
-    
+    else if (m_path->extension() == "lua")
+    {
+        std::cout << "Lua constructor initialized" << std::endl;
+        Reader::readLuaFile(*m_path, this);
+    }
 }
 
 utils::Path Model::path() const
