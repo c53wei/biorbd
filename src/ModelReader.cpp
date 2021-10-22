@@ -3,6 +3,8 @@
 
 #include <limits.h>
 
+#include "rbdl/rbdl_errors.h"
+
 #include "BiorbdModel.h"
 #include "Utils/Error.h"
 #include "Utils/IfStream.h"
@@ -20,6 +22,9 @@
 #include "RigidBody/MeshFace.h"
 #include "RigidBody/NodeSegment.h"
 #include "RigidBody/SoftContactSphere.h"
+#include "LuaTest/luamodel.h"
+#include "LuaTest/luatables.h"
+#include "LuaTest/luatypes.h"
 
 #ifdef MODULE_ACTUATORS
     #include "Actuators/ActuatorConstant.h"
@@ -2183,4 +2188,146 @@ std::vector<std::vector<utils::Vector3d>>
     file.close();
 
     return readViconMarkerFile(path, MarkersInFile, nFramesToGet);
+}
+
+Model Reader::readLuaFile(const utils::Path &path)
+{
+    // Add the elements that have been entered
+    Model model;
+    Reader::readLuaFile(path, &model);
+    return model;
+}
+
+void Reader::readLuaFile(
+    const utils::Path &path,
+    Model *model)
+{
+    const char *lua_path = path.absolutePath().c_str();
+    
+    LuaTable model_table = LuaTable::fromFile(lua_path);
+    bool verbose = true;
+    int frame_count = model_table["frames"].length();
+    // No force plates
+    int force_plates = -1;
+    
+    for(int i=1; i <= frame_count; ++i)
+    {
+        if (!model_table["frames"][i]["parent"].exists()) {
+          throw RigidBodyDynamics::Errors::RBDLError("Parent not defined for frame ");
+        }
+
+        utils::String body_name(model_table["frames"][i]["name"].getDefault<std::string>(""));
+        std::cout << "Segement: "<< body_name << std::endl;
+        
+        utils::String parent_name( model_table["frames"][i]["parent"].get<std::string>());
+        std::cout << "Parent: " << parent_name << std::endl;
+        
+        
+        // Make joint map into rotation and translation sequence
+        RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
+        RigidBodyDynamics::Math::MatrixNd joint_matrix(
+               model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder));
+        std::cout << "Initial Matrix:\n" << joint_matrix << "\n\n";
+        
+        char xyz[4] = "xyz";
+        std::string trans, rot;
+        
+        if(joint_matrix.size())
+        {
+            // Rotation
+            RigidBodyDynamics::Math::MatrixNd rot_mat =
+                joint_matrix(Eigen::all, Eigen::seq(0, Eigen::last/2));
+            
+            Eigen::Matrix<ptrdiff_t, 3, 1> rot_count = (rot_mat.array() == 1).colwise().count();
+            // Translation matrix
+            RigidBodyDynamics::Math::MatrixNd trans_mat = joint_matrix(Eigen::all, Eigen::seq(Eigen::last/2 + 1, Eigen::last));
+            Eigen::Matrix<ptrdiff_t, 3, 1> trans_count = (trans_mat.array() == 1).colwise().count();
+            for(int j = 0; j < 3; ++j)
+            {
+                if(rot_count[j]) {
+                    rot.append(1, xyz[j]);
+                }
+                if(trans_count[j])
+                {
+                    trans.append(1, xyz[j]);
+                }
+            }
+            std::cout << "Rotation Matrix:\n" << rot_mat << "\n";
+            std::cout << rot << "\n\n";
+            std::cout << "Translation Matrix:\n" << trans_mat << "\n";
+            std::cout << trans << "\n\n";
+        }
+        // QRanges
+        std::vector<utils::Range> QRanges;
+        size_t rot_length(0);
+        if (rot.compare("q")) {
+            // If not a quaternion
+            rot_length = rot.length();
+        } else {
+            rot_length = 4;
+        }
+        for (size_t j=0; j<trans.length() + rot_length; ++j) {
+            if (!rot.compare("q") && j>=trans.length()) {
+                QRanges.push_back(
+                    utils::Range (-1, 1));
+            } else {
+                QRanges.push_back(
+                    utils::Range ());
+            }
+        }
+        // QDotRanges & QDDotRanges
+        std::vector<utils::Range> QDotRanges;
+        std::vector<utils::Range> QDDotRanges;
+        rot_length = 0;
+        if (rot.compare("q")) {
+            // If not a quaternion
+            rot_length = rot.length();
+        } else {
+            rot_length = 3;
+        }
+        for (size_t j=0; j<trans.length() + rot_length; ++j) {
+            QDotRanges.push_back(
+                utils::Range (-M_PI*10, M_PI*10));
+            QDDotRanges.push_back(
+                utils::Range (-M_PI*100, M_PI*100));
+        }
+        // TODO: mass, com, inertia, mesh
+        double mass = model_table["frames"][i]["body"]["mass"];
+        std::cout << "Mass: "<< mass << std::endl;
+        
+        utils::Vector3d com(0,0,0);
+        com = model_table["frames"][i]["body"]["com"].getDefault<RigidBodyDynamics::Math::Vector3d>(com);
+        std::cout << "Centre of Mass: "<< com << std::endl;
+        
+        utils::Matrix3d inertia(utils::Matrix3d::Zero());
+        inertia = model_table["frames"][i]["body"]["inertia"].getDefault<RigidBodyDynamics::Math::Matrix3d>(inertia);
+        std::cout << "Inertia: " << inertia << std::endl;
+        
+        rigidbody::Mesh mesh;
+        
+        // TODO: Rototrans matrix
+        RigidBodyDynamics::Math::Vector3d r (model_table["frames"][i]["joint_frame"]["r"].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero()));
+        
+        RigidBodyDynamics::Math::Matrix3d E (model_table["frames"][i]["joint_frame"]["E"].getDefault<RigidBodyDynamics::Math::Matrix3d>(
+                                                                                                                                        RigidBodyDynamics::Math::Matrix3d::Identity()));
+        utils::RotoTrans RT(E, r);
+        std::cout << "RotoTrans: " << std::endl;
+        std::cout << RT << "\n\n";
+        
+        // Define segmeent attributes
+        rigidbody::SegmentCharacteristics characteristics(mass, com, inertia, mesh);
+        // Add the segment
+        model->AddSegment(body_name, parent_name, trans, rot, QRanges, QDotRanges,
+                          QDDotRanges, characteristics, RT, force_plates);
+
+    }
+    
+    if (model_table["gravity"].exists()) {
+        RigidBodyDynamics::Math::Vector3d gravity(model_table["gravity"].get<RigidBodyDynamics::Math::Vector3d>());
+        model->gravity = utils::Vector3d(gravity);
+        
+      if (verbose) {
+        std::cout << "gravity = " << model->gravity.transpose() << std::endl;
+      }
+    }
 }
