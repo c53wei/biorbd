@@ -2203,9 +2203,7 @@ void Reader::readLuaFile(
     Model *model)
 {
     const char *lua_path = path.absolutePath().c_str();
-    
     LuaTable model_table = LuaTable::fromFile(lua_path);
-    bool verbose = true;
     int frame_count = model_table["frames"].length();
     // No force plates
     int force_plates = -1;
@@ -2217,17 +2215,14 @@ void Reader::readLuaFile(
         }
 
         utils::String body_name(model_table["frames"][i]["name"].getDefault<std::string>(""));
-        std::cout << "Segement: "<< body_name << std::endl;
         
         utils::String parent_name( model_table["frames"][i]["parent"].get<std::string>());
-        std::cout << "Parent: " << parent_name << std::endl;
         
         
         // Make joint map into rotation and translation sequence
         RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
         RigidBodyDynamics::Math::MatrixNd joint_matrix(
                model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder));
-        std::cout << "Initial Matrix:\n" << joint_matrix << "\n\n";
         
         char xyz[4] = "xyz";
         std::string trans, rot;
@@ -2252,10 +2247,6 @@ void Reader::readLuaFile(
                     trans.append(1, xyz[j]);
                 }
             }
-            std::cout << "Rotation Matrix:\n" << rot_mat << "\n";
-            std::cout << rot << "\n\n";
-            std::cout << "Translation Matrix:\n" << trans_mat << "\n";
-            std::cout << trans << "\n\n";
         }
         // QRanges
         std::vector<utils::Range> QRanges;
@@ -2293,15 +2284,12 @@ void Reader::readLuaFile(
         }
         // TODO: mass, com, inertia, mesh
         double mass = model_table["frames"][i]["body"]["mass"];
-        std::cout << "Mass: "<< mass << std::endl;
         
         utils::Vector3d com(0,0,0);
         com = model_table["frames"][i]["body"]["com"].getDefault<RigidBodyDynamics::Math::Vector3d>(com);
-        std::cout << "Centre of Mass: "<< com << std::endl;
         
         utils::Matrix3d inertia(utils::Matrix3d::Zero());
         inertia = model_table["frames"][i]["body"]["inertia"].getDefault<RigidBodyDynamics::Math::Matrix3d>(inertia);
-        std::cout << "Inertia: " << inertia << std::endl;
         
         rigidbody::Mesh mesh;
         
@@ -2310,8 +2298,6 @@ void Reader::readLuaFile(
         RigidBodyDynamics::Math::Matrix3d E (model_table["frames"][i]["joint_frame"]["E"].getDefault<RigidBodyDynamics::Math::Matrix3d>(
                                                                                                                                         RigidBodyDynamics::Math::Matrix3d::Identity()));
         utils::RotoTrans RT(E, r);
-        std::cout << "RotoTrans: " << std::endl;
-        std::cout << RT << "\n\n";
         
         // Define segmeent attributes
         rigidbody::SegmentCharacteristics characteristics(mass, com, inertia, mesh);
@@ -2325,8 +2311,5 @@ void Reader::readLuaFile(
         RigidBodyDynamics::Math::Vector3d gravity(model_table["gravity"].get<RigidBodyDynamics::Math::Vector3d>());
         model->gravity = utils::Vector3d(gravity);
         
-      if (verbose) {
-        std::cout << "gravity = " << model->gravity.transpose() << std::endl;
-      }
     }
 }
