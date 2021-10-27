@@ -2305,7 +2305,6 @@ void Reader::readLuaFile(
         
         rigidbody::Mesh mesh;
         
-        // TODO: Rototrans matrix
         RigidBodyDynamics::Math::Vector3d r (model_table["frames"][i]["joint_frame"]["r"].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero()));
         
         RigidBodyDynamics::Math::Matrix3d E (model_table["frames"][i]["joint_frame"]["E"].getDefault<RigidBodyDynamics::Math::Matrix3d>(

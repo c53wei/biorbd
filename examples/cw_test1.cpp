@@ -40,8 +40,47 @@ using namespace BIORBD_NAMESPACE;
 int main()
 
 {
-    BiorbdEigen3::Model force_lua("sagar_ior.lua");
+    BiorbdEigen3::Model model("sagar_ior.lua");
+    // TODO: Add Markers
     
+    LuaTable model_table = LuaTable::fromFile("sagar_ior.lua");
+    int frame_count = model_table["frames"].length();
+    int marker_count;
+    
+    for(int i=1; i <= frame_count; ++i)
+    {
+        utils::String body_name(model_table["frames"][i]["name"].getDefault<std::string>(""));
+        std::cout << "Segement: "<< body_name << std::endl;
+        
+        utils::String parent_name( model_table["frames"][i]["parent"].get<std::string>());
+        std::cout << "Parent: " << parent_name << std::endl;
+        
+  
+        std::vector<LuaKey> marker_keys = model_table["frames"][i]["markers"].keys();
+        
+        // Insantiate parameters for AddMarker()
+        utils::String marker_name;
+        int parent_int = 0;
+        utils::Vector3d pos(0,0,0);
+        bool technical = true;
+        bool anatomical = false;
+        utils::String axesToRemove;
+        for(int j = 0; j < marker_keys.size(); ++j)
+        {
+            marker_name = marker_keys[j].string_value;
+            parent_int = model.GetBodyId(body_name.c_str());
+            // If parent_int still equals zero, no name has concurred
+            utils::Error::check(model.IsBodyId(parent_int),
+                                        "Wrong name in a segment");
+            pos = model_table["frames"][i]["markers"][marker_name.c_str()].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero());
+            cout << marker_name + ": " << pos << endl;
+            model.addMarker(pos, marker_name, parent_name, technical, anatomical, axesToRemove,
+                             parent_int);
+        }
+        
+        cout << model.nbMarkers() << endl;
+
+    }
     return 0;
 }
 
