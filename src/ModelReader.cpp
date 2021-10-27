@@ -2306,6 +2306,7 @@ void Reader::readLuaFile(
                           QDDotRanges, characteristics, RT, force_plates);
         
         // ============================= Add Markers =======================================
+        
         if (model_table["frames"][i]["markers"].exists())
         {
             std::vector<LuaKey> marker_keys = model_table["frames"][i]["markers"].keys();
@@ -2325,12 +2326,10 @@ void Reader::readLuaFile(
                 utils::Error::check(model->IsBodyId(parent_int),
                                             "Wrong name in a segment");
                 pos = model_table["frames"][i]["markers"][marker_name.c_str()].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero());
-                model->addMarker(pos, marker_name, parent_name, technical, anatomical, axesToRemove,
+                model->addMarker(pos, marker_name, body_name, technical, anatomical, axesToRemove,
                                  parent_int);
             }
-            
         }
-        
     }
     
     if (model_table["gravity"].exists()) {

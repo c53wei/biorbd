@@ -43,7 +43,14 @@ int main()
 
     cout << model.nbSegment() << endl; // 16
     cout << model.nbMarkers() << endl; // 49
+    
+    Writer::writeModel(model, "test_ior.bioMod");
+    
+    BiorbdEigen3::Model model2("test_ior.bioMod");
 
+    cout << model2.nbSegment() << endl; // 16
+    cout << model2.nbMarkers() << endl; // 49
+    
     
     return 0;
 }
