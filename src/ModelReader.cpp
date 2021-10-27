@@ -2218,6 +2218,7 @@ void Reader::readLuaFile(
         
         utils::String parent_name( model_table["frames"][i]["parent"].get<std::string>());
         
+        // ============================= Add segment ======================================
         
         // Make joint map into rotation and translation sequence
         RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
@@ -2282,7 +2283,6 @@ void Reader::readLuaFile(
             QDDotRanges.push_back(
                 utils::Range (-M_PI*100, M_PI*100));
         }
-        // TODO: mass, com, inertia, mesh
         double mass = model_table["frames"][i]["body"]["mass"];
         
         utils::Vector3d com(0,0,0);
@@ -2304,7 +2304,33 @@ void Reader::readLuaFile(
         // Add the segment
         model->AddSegment(body_name, parent_name, trans, rot, QRanges, QDotRanges,
                           QDDotRanges, characteristics, RT, force_plates);
-
+        
+        // ============================= Add Markers =======================================
+        if (model_table["frames"][i]["markers"].exists())
+        {
+            std::vector<LuaKey> marker_keys = model_table["frames"][i]["markers"].keys();
+            // Insantiate parameters
+            utils::String marker_name;
+            int parent_int = 0;
+            utils::Vector3d pos(0,0,0);
+            bool technical = true;
+            bool anatomical = false;
+            utils::String axesToRemove;
+            
+            for(int j = 0; j < marker_keys.size(); ++j)
+            {
+                marker_name = marker_keys[j].string_value;
+                parent_int = model->GetBodyId(body_name.c_str());
+                // If parent_int still equals zero, no name has concurred
+                utils::Error::check(model->IsBodyId(parent_int),
+                                            "Wrong name in a segment");
+                pos = model_table["frames"][i]["markers"][marker_name.c_str()].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero());
+                model->addMarker(pos, marker_name, parent_name, technical, anatomical, axesToRemove,
+                                 parent_int);
+            }
+            
+        }
+        
     }
     
     if (model_table["gravity"].exists()) {
