@@ -2203,9 +2203,7 @@ void Reader::readLuaFile(
     Model *model)
 {
     const char *lua_path = path.absolutePath().c_str();
-    
     LuaTable model_table = LuaTable::fromFile(lua_path);
-    bool verbose = true;
     int frame_count = model_table["frames"].length();
     // No force plates
     int force_plates = -1;
@@ -2217,17 +2215,15 @@ void Reader::readLuaFile(
         }
 
         utils::String body_name(model_table["frames"][i]["name"].getDefault<std::string>(""));
-        std::cout << "Segement: "<< body_name << std::endl;
         
         utils::String parent_name( model_table["frames"][i]["parent"].get<std::string>());
-        std::cout << "Parent: " << parent_name << std::endl;
         
+        // ============================= Add segment ======================================
         
         // Make joint map into rotation and translation sequence
         RigidBodyDynamics::Math::MatrixNd placeholder(6, 6);
         RigidBodyDynamics::Math::MatrixNd joint_matrix(
                model_table["frames"][i]["joint"].getDefault<RigidBodyDynamics::Math::MatrixNd>(placeholder));
-        std::cout << "Initial Matrix:\n" << joint_matrix << "\n\n";
         
         char xyz[4] = "xyz";
         std::string trans, rot;
@@ -2252,10 +2248,6 @@ void Reader::readLuaFile(
                     trans.append(1, xyz[j]);
                 }
             }
-            std::cout << "Rotation Matrix:\n" << rot_mat << "\n";
-            std::cout << rot << "\n\n";
-            std::cout << "Translation Matrix:\n" << trans_mat << "\n";
-            std::cout << trans << "\n\n";
         }
         // QRanges
         std::vector<utils::Range> QRanges;
@@ -2291,43 +2283,58 @@ void Reader::readLuaFile(
             QDDotRanges.push_back(
                 utils::Range (-M_PI*100, M_PI*100));
         }
-        // TODO: mass, com, inertia, mesh
         double mass = model_table["frames"][i]["body"]["mass"];
-        std::cout << "Mass: "<< mass << std::endl;
         
         utils::Vector3d com(0,0,0);
         com = model_table["frames"][i]["body"]["com"].getDefault<RigidBodyDynamics::Math::Vector3d>(com);
-        std::cout << "Centre of Mass: "<< com << std::endl;
         
         utils::Matrix3d inertia(utils::Matrix3d::Zero());
         inertia = model_table["frames"][i]["body"]["inertia"].getDefault<RigidBodyDynamics::Math::Matrix3d>(inertia);
-        std::cout << "Inertia: " << inertia << std::endl;
         
         rigidbody::Mesh mesh;
         
-        // TODO: Rototrans matrix
         RigidBodyDynamics::Math::Vector3d r (model_table["frames"][i]["joint_frame"]["r"].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero()));
         
         RigidBodyDynamics::Math::Matrix3d E (model_table["frames"][i]["joint_frame"]["E"].getDefault<RigidBodyDynamics::Math::Matrix3d>(
                                                                                                                                         RigidBodyDynamics::Math::Matrix3d::Identity()));
         utils::RotoTrans RT(E, r);
-        std::cout << "RotoTrans: " << std::endl;
-        std::cout << RT << "\n\n";
         
         // Define segmeent attributes
         rigidbody::SegmentCharacteristics characteristics(mass, com, inertia, mesh);
         // Add the segment
         model->AddSegment(body_name, parent_name, trans, rot, QRanges, QDotRanges,
                           QDDotRanges, characteristics, RT, force_plates);
-
+        
+        // ============================= Add Markers =======================================
+        
+        if (model_table["frames"][i]["markers"].exists())
+        {
+            std::vector<LuaKey> marker_keys = model_table["frames"][i]["markers"].keys();
+            // Insantiate parameters
+            utils::String marker_name;
+            int parent_int = 0;
+            utils::Vector3d pos(0,0,0);
+            bool technical = true;
+            bool anatomical = false;
+            utils::String axesToRemove;
+            
+            for(int j = 0; j < marker_keys.size(); ++j)
+            {
+                marker_name = marker_keys[j].string_value;
+                parent_int = model->GetBodyId(body_name.c_str());
+                // If parent_int still equals zero, no name has concurred
+                utils::Error::check(model->IsBodyId(parent_int),
+                                            "Wrong name in a segment");
+                pos = model_table["frames"][i]["markers"][marker_name.c_str()].getDefault<RigidBodyDynamics::Math::Vector3d>(RigidBodyDynamics::Math::Vector3d::Zero());
+                model->addMarker(pos, marker_name, body_name, technical, anatomical, axesToRemove,
+                                 parent_int);
+            }
+        }
     }
     
     if (model_table["gravity"].exists()) {
         RigidBodyDynamics::Math::Vector3d gravity(model_table["gravity"].get<RigidBodyDynamics::Math::Vector3d>());
         model->gravity = utils::Vector3d(gravity);
         
-      if (verbose) {
-        std::cout << "gravity = " << model->gravity.transpose() << std::endl;
-      }
     }
 }
