@@ -12,6 +12,7 @@
 #include "Utils/UtilsEnum.h"
 #include "Utils/String.h"
 #include "Utils/Error.h"
+#include "Utils/SpatialVector.h"
 
 using namespace BIORBD_NAMESPACE;
 
@@ -65,7 +66,7 @@ std::vector<RigidBodyDynamics::Math::SpatialVector>* rigidbody::SoftContacts::so
         std::vector<size_t> idx(segmentSoftContactIdx(i));
         RigidBodyDynamics::Math::SpatialVector tp(0.,0.,0.,0.,0.,0.);
         for (auto j : idx){
-            tp += (*m_softContacts)[j]->computeForceAtCom(model, Q, QDot, updateKin);
+            tp += (*m_softContacts)[j]->computeForceAtOrigin(model, Q, QDot, updateKin);
         }
 
         // Put all the force on the last dof of the segment
@@ -154,8 +155,30 @@ rigidbody::NodeSegment rigidbody::SoftContacts::softContactVelocity(
     unsigned int id(model.GetBodyId(sc.parent().c_str()));
 
     // Calculate the velocity of the point
-    return rigidbody::NodeSegment(RigidBodyDynamics::CalcPointVelocity(
-            model, Q, Qdot, id, sc, updateKin));
+    return rigidbody::NodeSegment(
+        RigidBodyDynamics::CalcPointVelocity(model, Q, Qdot, id, sc, updateKin)
+    );
+}
+
+rigidbody::NodeSegment rigidbody::SoftContacts::softContactAngularVelocity(
+            const rigidbody::GeneralizedCoordinates &Q,
+            const rigidbody::GeneralizedVelocity &Qdot,
+            unsigned int idx,
+            bool updateKin)
+{
+    // Assuming that this is also a joint type (via BiorbdModel)
+    rigidbody::Joints &model = dynamic_cast<rigidbody::Joints &>(*this);
+#ifdef BIORBD_USE_CASADI_MATH
+    updateKin = true;
+#endif
+
+    const rigidbody::SoftContactNode& sc(softContact(idx));
+    unsigned int id(model.GetBodyId(sc.parent().c_str()));
+
+    // Calculate the velocity of the point
+    return rigidbody::NodeSegment(
+        RigidBodyDynamics::CalcPointVelocity6D(model, Q, Qdot, id, sc, updateKin).block(0, 0, 3, 1)
+    );
 }
 
 std::vector<rigidbody::NodeSegment> rigidbody::SoftContacts::softContactsVelocity(
@@ -166,6 +189,20 @@ std::vector<rigidbody::NodeSegment> rigidbody::SoftContacts::softContactsVelocit
     std::vector<rigidbody::NodeSegment> pos;
     for (unsigned int i=0; i<nbSoftContacts(); ++i) {
         pos.push_back(softContactVelocity(Q, Qdot, i, updateKin));
+        updateKin = false;
+    }
+
+    return pos;
+}
+
+std::vector<rigidbody::NodeSegment> rigidbody::SoftContacts::softContactsAngularVelocity(
+            const rigidbody::GeneralizedCoordinates &Q,
+            const rigidbody::GeneralizedVelocity &Qdot,
+            bool updateKin)
+{
+    std::vector<rigidbody::NodeSegment> pos;
+    for (unsigned int i=0; i<nbSoftContacts(); ++i) {
+        pos.push_back(softContactAngularVelocity(Q, Qdot, i, updateKin));
         updateKin = false;
     }
 

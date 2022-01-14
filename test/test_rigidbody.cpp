@@ -145,6 +145,118 @@ TEST(Contacts, DeepCopy)
     }
 }
 
+TEST(RigidContacts, create){
+    Model model;
+    model.AddSegment("Seg1", "root", "xyz", "xyz", {}, {}, {}, rigidbody::SegmentCharacteristics(), utils::RotoTrans());
+    unsigned int id = model.GetBodyId("Seg1");
+    model.AddConstraint(id, utils::Vector3d(0.1, 0.2, 0.3), utils::Vector3d(1, 0, 0), "ContactX");
+    model.AddConstraint(id, utils::Vector3d(0.4, 0.5, 0.6), utils::Vector3d(0, 1, 0), "ContactY");
+    model.AddConstraint(id, utils::Vector3d(0.7, 0.8, 0.9), utils::Vector3d(0, 0, 1), "ContactZ");
+    model.AddConstraint(id, utils::Vector3d(0.1, 0.2, 0.3), "x", "ContactX2");
+
+    EXPECT_EQ(model.nbRigidContacts(), 4);
+
+    {
+        unsigned int n(0);
+        EXPECT_STREQ(model.rigidContact(n).utils::Node::name().c_str(), "ContactX");
+        SCALAR_TO_DOUBLE(contactX, model.rigidContact(n)[0]);
+        SCALAR_TO_DOUBLE(contactY, model.rigidContact(n)[1]);
+        SCALAR_TO_DOUBLE(contactZ, model.rigidContact(n)[2]);
+        EXPECT_EQ(contactX, 0.1);
+        EXPECT_EQ(contactY, 0.2);
+        EXPECT_EQ(contactZ, 0.3);
+        EXPECT_EQ(model.rigidContact(n).axes()[0], 1);
+        EXPECT_EQ(model.rigidContact(n).axes()[1], 0);
+        EXPECT_EQ(model.rigidContact(n).axes()[2], 0);
+    }
+
+    {
+        unsigned int n(1);
+        EXPECT_STREQ(model.rigidContact(n).utils::Node::name().c_str(), "ContactY");
+        SCALAR_TO_DOUBLE(contactX, model.rigidContact(n)[0]);
+        SCALAR_TO_DOUBLE(contactY, model.rigidContact(n)[1]);
+        SCALAR_TO_DOUBLE(contactZ, model.rigidContact(n)[2]);
+        EXPECT_EQ(contactX, 0.4);
+        EXPECT_EQ(contactY, 0.5);
+        EXPECT_EQ(contactZ, 0.6);
+        EXPECT_EQ(model.rigidContact(n).axes()[0], 0);
+        EXPECT_EQ(model.rigidContact(n).axes()[1], 1);
+        EXPECT_EQ(model.rigidContact(n).axes()[2], 0);
+    }
+
+    {
+        unsigned int n(2);
+        EXPECT_STREQ(model.rigidContact(n).utils::Node::name().c_str(), "ContactZ");
+        SCALAR_TO_DOUBLE(contactX, model.rigidContact(n)[0]);
+        SCALAR_TO_DOUBLE(contactY, model.rigidContact(n)[1]);
+        SCALAR_TO_DOUBLE(contactZ, model.rigidContact(n)[2]);
+        EXPECT_EQ(contactX, 0.7);
+        EXPECT_EQ(contactY, 0.8);
+        EXPECT_EQ(contactZ, 0.9);
+        EXPECT_EQ(model.rigidContact(n).axes()[0], 0);
+        EXPECT_EQ(model.rigidContact(n).axes()[1], 0);
+        EXPECT_EQ(model.rigidContact(n).axes()[2], 1);
+    }
+
+    {
+        unsigned int n(3);
+        EXPECT_STREQ(model.rigidContact(n).utils::Node::name().c_str(), "ContactX2");
+        SCALAR_TO_DOUBLE(contactX, model.rigidContact(n)[0]);
+        SCALAR_TO_DOUBLE(contactY, model.rigidContact(n)[1]);
+        SCALAR_TO_DOUBLE(contactZ, model.rigidContact(n)[2]);
+        EXPECT_EQ(contactX, 0.1);
+        EXPECT_EQ(contactY, 0.2);
+        EXPECT_EQ(contactZ, 0.3);
+        EXPECT_EQ(model.rigidContact(n).axes()[0], 1);
+        EXPECT_EQ(model.rigidContact(n).axes()[1], 0);
+        EXPECT_EQ(model.rigidContact(n).axes()[2], 0);
+    }
+
+
+    rigidbody::GeneralizedCoordinates Q(model);
+    rigidbody::GeneralizedVelocity QDot(model);
+    rigidbody::GeneralizedVelocity QDDot(model);
+    FILL_VECTOR(Q, std::vector<double>({-2.01, -3.01, -3.01, 0.1, 0.2, 0.3}));
+    FILL_VECTOR(QDot, std::vector<double>({0.1, 0.1, 0.1, 0.1, 0.1, 0.1}));
+    FILL_VECTOR(QDDot, std::vector<double>({0.5, 0.5, 0.5, 0.5, 0.5, 0.5}));
+
+    {
+        std::vector<double> positionExpected = {-1.9146957599281647, -2.8191133387246508, -2.70262501017246};
+        auto position = model.rigidContact(Q, 0, true);
+        auto positionAll = model.rigidContacts(Q, true);
+        for (unsigned int i = 0; i < 3; ++i) {
+            SCALAR_TO_DOUBLE(p, position[i]);
+            SCALAR_TO_DOUBLE(p2, positionAll[0][i]);
+            EXPECT_NEAR(p, positionExpected[i], requiredPrecision);
+            EXPECT_NEAR(p2, positionExpected[i], requiredPrecision);
+        }
+    }
+
+    {
+        std::vector<double> velocityExpected = {0.10705609071138775, 0.0734011441522157, 0.11433067610957084};
+        auto velocity = model.rigidContactVelocity(Q, QDot, 0);
+        auto velocityAll = model.rigidContactsVelocity(Q, QDot);
+        for (unsigned int i = 0; i < 3; ++i) {
+            SCALAR_TO_DOUBLE(v, velocity[i]);
+            SCALAR_TO_DOUBLE(v2, velocityAll[0][i]);
+            EXPECT_NEAR(v, velocityExpected[i], requiredPrecision);
+            EXPECT_NEAR(v2, velocityExpected[i], requiredPrecision);
+        }
+    }
+
+    {
+        std::vector<double> accelerationExpected = {0.53484698259518959, 0.36370063728727758, 0.57070845052506336};
+        auto acceleration = model.rigidContactAcceleration(Q, QDot, QDDot, 0);
+        auto accelerationAll = model.rigidContactsAcceleration(Q, QDot, QDDot);
+        for (unsigned int i = 0; i < 3; ++i) {
+            SCALAR_TO_DOUBLE(a, acceleration[i]);
+            SCALAR_TO_DOUBLE(a2, accelerationAll[0][i]);
+            EXPECT_NEAR(a, accelerationExpected[i], requiredPrecision);
+            EXPECT_NEAR(a2, accelerationExpected[i], requiredPrecision);
+        }
+    }
+}
+
 TEST(SoftContacts, creation){
     {
         Model model(modelWithSoftContact);
@@ -356,14 +468,15 @@ TEST(SoftContacts, DeepCopy){
 }
 
 TEST(SoftContacts, unitTest){
-    rigidbody::SoftContactSphere sphere(0, 0, 0, 0.05, 1e6, 4);
+    rigidbody::SoftContactSphere sphere(0, 0, 0, 0.05, 1e6, 4, 0.8, 0.7, 0.5);
     {
-        utils::Vector3d x(0.01, 0, 0.1);
+        utils::Vector3d x(0.01, 0, 0.07);
         utils::Vector3d dx(0.01, 0, -0.01);
+        utils::Vector3d angularVelocity(1, 2, 3);
 
-        utils::Vector3d force = sphere.computeForce(x, dx);
+        utils::Vector3d force = sphere.computeForce(x, dx, angularVelocity);
 
-        std::vector<double> forceExpected = {-2.54011091e-10, 0.0, 3.31044356e-10};
+        std::vector<double> forceExpected = {0.003612873666450995, -0.0020071520369172192, 0.0054920962166388866};
         for (unsigned int i = 0; i < 3; ++i) {
             SCALAR_TO_DOUBLE(f, force(i));
             EXPECT_NEAR(f, forceExpected[i], requiredPrecision);
@@ -373,8 +486,9 @@ TEST(SoftContacts, unitTest){
     {
         utils::Vector3d x(0.01, 0, 0.0501);
         utils::Vector3d dx(0.01, 0, -0.01);
+        utils::Vector3d angularVelocity(0, 0, 0);
 
-        utils::Vector3d force = sphere.computeForce(x, dx);
+        utils::Vector3d force = sphere.computeForce(x, dx, angularVelocity);
 
         std::vector<double> forceExpected = {-0.11760935061746022, 0., 0.15327642466721322};
         for (unsigned int i = 0; i < 3; ++i) {
@@ -386,8 +500,9 @@ TEST(SoftContacts, unitTest){
     {
         utils::Vector3d x(0.01, 0, 0.049);
         utils::Vector3d dx(0.01, 0.01, -0.01);
+        utils::Vector3d angularVelocity(0, 0, 0);
 
-        utils::Vector3d force = sphere.computeForce(x, dx);
+        utils::Vector3d force = sphere.computeForce(x, dx, angularVelocity);
 
         std::vector<double> forceExpected = {-3.5460071631036567, -3.5460071631036567, 6.4525442574502909};
         for (unsigned int i = 0; i < 3; ++i) {
@@ -397,7 +512,7 @@ TEST(SoftContacts, unitTest){
     }
 }
 
-TEST(SoftContacts, ForceAtCoM){
+TEST(SoftContacts, ForceAtOrigin){
     Model model(modelWithSoftContact);
     rigidbody::SoftContactSphere sphere(model.softContact(0));
 
@@ -407,10 +522,10 @@ TEST(SoftContacts, ForceAtCoM){
         FILL_VECTOR(Q, std::vector<double>({-2.01, -3.01, -3.01, 0.}));
         FILL_VECTOR(QDot, std::vector<double>({0.1, 0.1, 0.1, 0.1}));
 
-        RigidBodyDynamics::Math::SpatialVector force = sphere.computeForceAtCom(model, Q, QDot);
+        utils::SpatialVector force = sphere.computeForceAtOrigin(model, Q, QDot);
 
-        std::vector<double> forceExpected = {-169.49529328017607, 835.69754838406357, -2.2059677321320312,
-                                             -275.74596651650978, -55.149193303301956, 294.47295042042418};
+        std::vector<double> forceExpected = {-670.95355043718416, 2.944729504204179, 2.2119497381886286,
+                                             0, -221.1949738188676, 294.47295042042418};
         for (unsigned int i = 0; i < 6; ++i) {
             SCALAR_TO_DOUBLE(f, force(i));
             EXPECT_NEAR(f, forceExpected[i], requiredPrecision);

@@ -338,14 +338,21 @@ std::vector<RigidBodyDynamics::Math::SpatialVector> * rigidbody::Joints::combine
     return f_ext_rbdl;
 }
 
-int rigidbody::Joints::GetBodyBiorbdId(const utils::String
-        &segmentName) const
+int rigidbody::Joints::GetBodyBiorbdId(
+        const utils::String &segmentName) const
 {
     for (int i=0; i<static_cast<int>(m_segments->size()); ++i)
         if (!(*m_segments)[static_cast<unsigned int>(i)].name().compare(segmentName)) {
             return i;
         }
     return -1;
+}
+
+
+int rigidbody::Joints::GetBodyRbdlId(
+        const utils::String &segmentName) const
+{
+    return GetBodyId(segmentName.c_str());
 }
 
 std::vector<utils::RotoTrans> rigidbody::Joints::allGlobalJCS(
@@ -601,6 +608,27 @@ rigidbody::Joints::CalcBodyWorldTransformation(
 
     return RigidBodyDynamics::Math::SpatialTransform (
                this->X_base[segmentIdx].E.transpose(), this->X_base[segmentIdx].r);
+}
+
+
+// Get a segment's angular velocity
+utils::Vector3d rigidbody::Joints::segmentAngularVelocity(
+    const rigidbody::GeneralizedCoordinates &Q,
+    const rigidbody::GeneralizedVelocity &Qdot,
+    unsigned int idx,
+    bool updateKin)
+{
+    // Assuming that this is also a joint type (via BiorbdModel)
+#ifdef BIORBD_USE_CASADI_MATH
+    updateKin = true;
+#endif
+
+    const utils::String& segmentName(segment(idx).name());
+    unsigned int id(this->GetBodyId(segmentName.c_str()));
+
+    // Calculate the velocity of the point
+    return RigidBodyDynamics::CalcPointVelocity6D(
+                *this, Q, Qdot, id, utils::Vector3d(0, 0, 0), updateKin).block(0, 0, 3, 1);
 }
 
 utils::Vector3d rigidbody::Joints::CoM(

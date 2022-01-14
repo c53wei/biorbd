@@ -8,6 +8,11 @@
 namespace BIORBD_NAMESPACE
 {
 
+namespace utils
+{
+class SpatialVector;
+}
+
 namespace rigidbody
 {
 class Joints;
@@ -80,14 +85,14 @@ public:
     void DeepCopy(const SoftContactNode& other);
 
     ///
-    /// \brief Get the force in a spatial vector at the center of mass of the underlying segment
+    /// \brief Get the force in a spatial vector at the origin of the world base coordinates
     /// \param model The model
     /// \param Q The Generalized Coordinates
     /// \param QDot The Generalized velocities
     /// \param updateKin If the kinematics should be updated
     /// \return The Spatial vector
     ///
-    virtual RigidBodyDynamics::Math::SpatialVector computeForceAtCom(
+    virtual utils::SpatialVector computeForceAtOrigin(
             Joints& model,
             const GeneralizedCoordinates& Q,
             const GeneralizedVelocity& QDot,
@@ -101,7 +106,8 @@ public:
     ///
     virtual utils::Vector3d computeForce(
             const utils::Vector3d& x,
-            const utils::Vector3d& dx) const = 0;
+            const utils::Vector3d& dx,
+            const utils::Vector3d& angularVelocity) const = 0;
 
     ///
     /// \brief Get the application point relative to the plane
