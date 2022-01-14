@@ -10,7 +10,12 @@
 
 #include "Utils/all.h"
 #include "RigidBody/all.h"
-#include "LuaTest/all.h"
+
+//create ifdef and cmake option to enable lua models
+#include "rbdl/addons/luamodel/luamodel.h"
+#include "rbdl/addons/luamodel/luastructs.h"
+#include "rbdl/addons/luamodel/luatables.h"
+#include "rbdl/addons/luamodel/luatypes.h"
 #ifdef MODULE_MUSCLES
     #include "Muscles/all.h"
 #endif

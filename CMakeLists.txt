@@ -177,8 +177,8 @@ add_subdirectory("src/RigidBody")
 list(APPEND BIORBD_MODULE_NAMES "${RIGIDBODY_MODULE_NAME}")
 
 # Lua Test
-add_subdirectory("src/LuaTest")
-list(APPEND BIORBD_MODULE_NAMES "${LUATEST_MODULE_NAME}")
+#add_subdirectory("src/LuaTest")
+#list(APPEND BIORBD_MODULE_NAMES "${LUATEST_MODULE_NAME}")
 
 # Actuators
 option(MODULE_ACTUATORS
@@ -203,6 +203,7 @@ target_link_libraries(${BIORBD_NAME}
     "${MATH_BACKEND_LIBRARIES}"
     "${IPOPT_LIBRARY}"
     "${TinyXML_LIBRARY}"
+    "${RBDL_LUAMODEL_LIBRARY}"
 )
 
 # install target

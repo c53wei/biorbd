@@ -1,6 +1,6 @@
 #include "biorbd.h"
-#include "LuaTest/luamodel.h"
-#include "LuaTest/luatables.h"
+// #include "LuaTest/luamodel.h"
+// #include "LuaTest/luatables.h"
 #include <rbdl/rbdl.h>
 #include <string>
 #include <vector>

@@ -22,9 +22,10 @@
 #include "RigidBody/MeshFace.h"
 #include "RigidBody/NodeSegment.h"
 #include "RigidBody/SoftContactSphere.h"
-#include "LuaTest/luamodel.h"
-#include "LuaTest/luatables.h"
-#include "LuaTest/luatypes.h"
+
+#include "rbdl/addons/luamodel/luamodel.h"
+#include "rbdl/addons/luamodel/luatables.h"
+#include "rbdl/addons/luamodel/luatypes.h"
 
 #ifdef MODULE_ACTUATORS
     #include "Actuators/ActuatorConstant.h"
@@ -2202,8 +2203,7 @@ void Reader::readLuaFile(
     const utils::Path &path,
     Model *model)
 {
-    const char *lua_path = path.absolutePath().c_str();
-    LuaTable model_table = LuaTable::fromFile(lua_path);
+    LuaTable model_table = LuaTable::fromFile(path.absolutePath().c_str());
     int frame_count = model_table["frames"].length();
     // No force plates
     int force_plates = -1;
