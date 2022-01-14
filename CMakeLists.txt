@@ -176,10 +176,6 @@ list(APPEND BIORBD_MODULE_NAMES "${UTILS_MODULE_NAME}")
 add_subdirectory("src/RigidBody")
 list(APPEND BIORBD_MODULE_NAMES "${RIGIDBODY_MODULE_NAME}")
 
-# Lua Test
-#add_subdirectory("src/LuaTest")
-#list(APPEND BIORBD_MODULE_NAMES "${LUATEST_MODULE_NAME}")
-
 # Actuators
 option(MODULE_ACTUATORS
     "Choose if the module actuators is to be added to biorbd" ON)
